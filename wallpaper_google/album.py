@@ -12,7 +12,9 @@ import urllib.request
 from . import paths, store
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
-PHOTO_RE = re.compile(r'\["(https://lh3\.googleusercontent\.com/pw/[A-Za-z0-9_\-]+)"')
+PHOTO_RE = re.compile(
+    r'\["(https://lh3\.googleusercontent\.com/pw/[A-Za-z0-9_\-]+)",(\d+),(\d+)'
+)
 REFRESH_SECONDS = 24 * 3600
 
 
@@ -25,10 +27,10 @@ def fetch(url: str, timeout: int = 60) -> bytes:
 def scrape(album_url: str) -> list:
     html = fetch(album_url).decode("utf-8", "replace")
     seen, photos = set(), []
-    for u in PHOTO_RE.findall(html):
+    for u, w, h in PHOTO_RE.findall(html):
         if u not in seen:
             seen.add(u)
-            photos.append(u)
+            photos.append([u, int(w), int(h)])
     return photos
 
 
@@ -44,10 +46,10 @@ def refresh(album_url: str) -> list:
 
 
 def photos(album_url: str) -> list:
-    """Lista de fotos, refrescándola si tiene más de un día (y si hay red)."""
+    """Lista de [url, ancho, alto], refrescándola si tiene más de un día (y si hay red)."""
     data = store.load(paths.ALBUM_FILE)
     fresh = data.get("url") == album_url and time.time() - data.get("updated", 0) < REFRESH_SECONDS
-    if fresh and data.get("photos"):
+    if fresh and data.get("photos") and isinstance(data["photos"][0], list):
         return data["photos"]
     try:
         return refresh(album_url)

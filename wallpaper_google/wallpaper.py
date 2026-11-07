@@ -36,6 +36,9 @@ def next_random() -> str:
     if not url:
         raise SystemExit("No hay álbum configurado. Ejecuta: wallpaper-google album <enlace>")
     pool = album.photos(url)
+    if not cfg.get("verticales"):
+        pool = [p for p in pool if p[1] >= p[2]] or pool
+    pool = [p[0] for p in pool]
     state = store.load(paths.STATE_FILE)
     recent = state.get("recent", [])
     keep = min(HISTORY, len(pool) // 2)

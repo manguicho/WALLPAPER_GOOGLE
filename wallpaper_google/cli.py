@@ -20,6 +20,8 @@ def main(argv=None) -> None:
     sub.add_parser("auto-off", help="Desactivar el cambio automático")
     r = sub.add_parser("resolucion", help="Fijar la resolución de descarga (ej. 2560x1440)")
     r.add_argument("tam", help="ANCHOxALTO, o 'auto' para detectarla de la pantalla")
+    v = sub.add_parser("verticales", help="Incluir o no las fotos verticales (por defecto no)")
+    v.add_argument("valor", choices=["si", "no"])
     sub.add_parser("estado", help="Mostrar la configuración actual")
     args = p.parse_args(argv)
     cfg = store.load(paths.CONFIG_FILE)
@@ -50,11 +52,18 @@ def main(argv=None) -> None:
             cfg["resolucion"] = [int(m[1]), int(m[2])]
         store.save(paths.CONFIG_FILE, cfg)
         print("Resolución guardada.")
+    elif args.cmd == "verticales":
+        cfg["verticales"] = args.valor == "si"
+        store.save(paths.CONFIG_FILE, cfg)
+        print("Fotos verticales " + ("incluidas." if cfg["verticales"] else "excluidas."))
     elif args.cmd == "estado":
         from .wallpaper import screen_resolution
         data = store.load(paths.ALBUM_FILE)
         print(f"Álbum: {cfg.get('album', 'sin configurar')}")
-        print(f"Fotos en la lista: {len(data.get('photos', []))}")
+        fotos = data.get("photos", [])
+        horiz = sum(1 for f in fotos if isinstance(f, list) and f[1] >= f[2])
+        print(f"Fotos en la lista: {len(fotos)} ({horiz} horizontales)")
+        print(f"Verticales: {'incluidas' if cfg.get('verticales') else 'excluidas'}")
         res = cfg.get("resolucion") or screen_resolution()
         print(f"Resolución de descarga: {res[0]}x{res[1]}")
 

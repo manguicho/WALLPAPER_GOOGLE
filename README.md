@@ -33,6 +33,7 @@ wallpaper-google siguiente      # cambia el fondo ahora
 wallpaper-google auto 30min     # cambia solo cada 30 minutos (15min, 1h, 2h...)
 wallpaper-google auto-off       # desactiva el cambio automático
 wallpaper-google resolucion 2560x1440   # o "auto" para detectarla con xrandr
+wallpaper-google verticales si   # por defecto solo usa fotos horizontales
 wallpaper-google estado
 ```
 
