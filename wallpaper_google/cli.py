@@ -7,7 +7,7 @@ from . import __version__, paths, store
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(
         prog="wallpaper-google",
-        description="Fondo de pantalla al azar desde un álbum compartido de Google Fotos (GNOME).",
+        description="Fondo de pantalla al azar desde un álbum compartido de Google Fotos (GNOME o Windows).",
     )
     p.add_argument("--version", action="version", version=__version__)
     sub = p.add_subparsers(dest="cmd", required=True)
