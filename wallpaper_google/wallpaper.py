@@ -34,7 +34,7 @@ def next_random() -> str:
     cfg = store.load(paths.CONFIG_FILE)
     url = cfg.get("album")
     if not url:
-        raise SystemExit("No hay álbum configurado. Ejecuta: wallpaper-google album <enlace>")
+        raise SystemExit("No hay álbum configurado. Ejecutá: wallpaper-google album <enlace>")
     pool = album.photos(url)
     if not cfg.get("verticales"):
         pool = [p for p in pool if p[1] >= p[2]] or pool

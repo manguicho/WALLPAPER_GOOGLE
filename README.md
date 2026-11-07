@@ -8,7 +8,7 @@ a la resolución de tu pantalla.
 
 ## Cómo funciona
 
-1. Compartes el álbum por enlace (Google Fotos → álbum → Compartir → Crear enlace).
+1. Compartís el álbum por enlace (Google Fotos → álbum → Compartir → Crear enlace).
 2. La app lee la página pública del álbum y guarda la lista de todas las fotos (se actualiza una vez al día; un álbum de 10.000 fotos tarda unos 30 segundos).
 3. Cada X tiempo baja una foto al azar y la pone de fondo con `gsettings`. Sin repetir las últimas.
 

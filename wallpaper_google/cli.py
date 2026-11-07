@@ -48,7 +48,7 @@ def main(argv=None) -> None:
         else:
             m = re.fullmatch(r"(\d+)x(\d+)", args.tam)
             if not m:
-                p.error("usa el formato ANCHOxALTO, por ejemplo 2560x1440")
+                p.error("usá el formato ANCHOxALTO, por ejemplo 2560x1440")
             cfg["resolucion"] = [int(m[1]), int(m[2])]
         store.save(paths.CONFIG_FILE, cfg)
         print("Resolución guardada.")
