@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wallpaper-google"
+version = "0.1.0"
+description = "Fondos de pantalla aleatorios desde Google Fotos para GNOME"
+requires-python = ">=3.9"
+dependencies = [
+    "google-auth>=2.20",
+    "google-auth-oauthlib>=1.0",
+    "requests>=2.28",
+]
+
+[project.scripts]
+wallpaper-google = "wallpaper_google.cli:main"
+
+[tool.setuptools]
+packages = ["wallpaper_google"]
