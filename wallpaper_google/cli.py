@@ -1,59 +1,62 @@
 import argparse
+import re
 
-from . import __version__, paths
+from . import __version__, paths, store
 
 
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(
         prog="wallpaper-google",
-        description="Fondos de pantalla aleatorios desde Google Fotos (GNOME).",
+        description="Fondo de pantalla al azar desde un álbum compartido de Google Fotos (GNOME).",
     )
     p.add_argument("--version", action="version", version=__version__)
     sub = p.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("login", help="Iniciar sesión en Google")
-    e = sub.add_parser("elegir", help="Elegir fotos en Google Fotos y descargarlas")
-    e.add_argument("--reemplazar", action="store_true",
-                   help="Borra las fotos que ya tenías antes de descargar las nuevas")
-    sub.add_parser("siguiente", help="Poner un fondo al azar ahora")
-    a = sub.add_parser("auto", help="Cambiar el fondo automáticamente")
-    a.add_argument("cada", nargs="?", default="30min",
+    a = sub.add_parser("album", help="Configurar el enlace del álbum compartido")
+    a.add_argument("enlace")
+    sub.add_parser("siguiente", help="Bajar una foto al azar y ponerla de fondo ahora")
+    t = sub.add_parser("auto", help="Cambiar el fondo automáticamente")
+    t.add_argument("cada", nargs="?", default="30min",
                    help="Intervalo (ej. 15min, 1h, 2h). Por defecto 30min")
     sub.add_parser("auto-off", help="Desactivar el cambio automático")
-    sub.add_parser("estado", help="Mostrar cuántas fotos hay y dónde")
+    r = sub.add_parser("resolucion", help="Fijar la resolución de descarga (ej. 2560x1440)")
+    r.add_argument("tam", help="ANCHOxALTO, o 'auto' para detectarla de la pantalla")
+    sub.add_parser("estado", help="Mostrar la configuración actual")
     args = p.parse_args(argv)
+    cfg = store.load(paths.CONFIG_FILE)
 
-    if args.cmd == "login":
-        from .auth import get_credentials
-        get_credentials()
-        print("Sesión iniciada.")
-    elif args.cmd == "elegir":
-        from .auth import session
-        from .picker import download, pick
-        sess = session()
-        picked = pick(sess)
-        if args.reemplazar:
-            for f in paths.PHOTOS_DIR.glob("*"):
-                f.unlink()
-        n = download(sess, picked)
-        print(f"{n} fotos listas en {paths.PHOTOS_DIR}")
-        if n:
-            from .wallpaper import next_random
-            print(f"Fondo puesto: {next_random().name}")
+    if args.cmd == "album":
+        from .album import refresh
+        n = len(refresh(args.enlace))
+        cfg["album"] = args.enlace
+        store.save(paths.CONFIG_FILE, cfg)
+        print(f"Álbum guardado: {n} fotos encontradas.")
     elif args.cmd == "siguiente":
         from .wallpaper import next_random
-        print(f"Fondo puesto: {next_random().name}")
+        next_random()
+        print("Fondo cambiado.")
     elif args.cmd == "auto":
         from .timer import install
         install(args.cada)
     elif args.cmd == "auto-off":
         from .timer import uninstall
         uninstall()
+    elif args.cmd == "resolucion":
+        if args.tam == "auto":
+            cfg.pop("resolucion", None)
+        else:
+            m = re.fullmatch(r"(\d+)x(\d+)", args.tam)
+            if not m:
+                p.error("usa el formato ANCHOxALTO, por ejemplo 2560x1440")
+            cfg["resolucion"] = [int(m[1]), int(m[2])]
+        store.save(paths.CONFIG_FILE, cfg)
+        print("Resolución guardada.")
     elif args.cmd == "estado":
-        from .wallpaper import photos
-        print(f"Fotos: {len(photos())} en {paths.PHOTOS_DIR}")
-        print(f"Credenciales: {paths.CLIENT_SECRET} "
-              f"({'ok' if paths.CLIENT_SECRET.exists() else 'falta'})")
-        print(f"Sesión: {'ok' if paths.TOKEN_FILE.exists() else 'sin iniciar'}")
+        from .wallpaper import screen_resolution
+        data = store.load(paths.ALBUM_FILE)
+        print(f"Álbum: {cfg.get('album', 'sin configurar')}")
+        print(f"Fotos en la lista: {len(data.get('photos', []))}")
+        res = cfg.get("resolucion") or screen_resolution()
+        print(f"Resolución de descarga: {res[0]}x{res[1]}")
 
 
 if __name__ == "__main__":

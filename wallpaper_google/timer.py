@@ -1,6 +1,5 @@
 """Temporizador de systemd (usuario) para cambiar el fondo automáticamente."""
 
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -10,11 +9,13 @@ NAME = "wallpaper-google"
 
 
 def install(every: str) -> None:
-    exe = shutil.which("wallpaper-google") or f"{sys.executable} -m wallpaper_google"
+    pkg_parent = Path(__file__).resolve().parent.parent
     UNIT_DIR.mkdir(parents=True, exist_ok=True)
     (UNIT_DIR / f"{NAME}.service").write_text(
-        "[Unit]\nDescription=Cambia el fondo de pantalla con una foto de Google Fotos\n\n"
-        f"[Service]\nType=oneshot\nExecStart={exe} siguiente\n"
+        "[Unit]\nDescription=Cambia el fondo de pantalla con una foto de Google Fotos\n"
+        "After=network-online.target\n\n"
+        f"[Service]\nType=oneshot\nEnvironment=PYTHONPATH={pkg_parent}\n"
+        f"ExecStart={sys.executable} -m wallpaper_google siguiente\n"
     )
     (UNIT_DIR / f"{NAME}.timer").write_text(
         "[Unit]\nDescription=Cambio periódico de fondo de pantalla\n\n"

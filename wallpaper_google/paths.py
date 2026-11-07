@@ -4,15 +4,13 @@ from pathlib import Path
 APP = "wallpaper-google"
 
 CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / APP
-DATA_DIR = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / APP
-PHOTOS_DIR = DATA_DIR / "photos"
-STATE_FILE = DATA_DIR / "state.json"
+CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / APP
 
-CLIENT_SECRET = CONFIG_DIR / "client_secret.json"
-TOKEN_FILE = CONFIG_DIR / "token.json"
+CONFIG_FILE = CONFIG_DIR / "config.json"
+ALBUM_FILE = CACHE_DIR / "album.json"
+STATE_FILE = CACHE_DIR / "state.json"
 
 
 def ensure_dirs() -> None:
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
-    os.chmod(CONFIG_DIR, 0o700)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
