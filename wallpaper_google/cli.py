@@ -28,7 +28,7 @@ def main(argv=None) -> None:
 
     if args.cmd == "album":
         from .album import refresh
-        n = len(refresh(args.enlace))
+        n = len(refresh(args.enlace, verbose=True))
         cfg["album"] = args.enlace
         store.save(paths.CONFIG_FILE, cfg)
         print(f"Álbum guardado: {n} fotos encontradas.")
