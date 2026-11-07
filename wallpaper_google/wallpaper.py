@@ -1,8 +1,9 @@
-"""Baja una foto al azar del álbum y la pone de fondo en GNOME."""
+"""Baja una foto al azar del álbum y la pone de fondo (GNOME o Windows)."""
 
 import random
 import re
 import subprocess
+import sys
 
 from . import album, paths, store
 
@@ -30,6 +31,10 @@ def set_wallpaper(path) -> None:
     subprocess.run(["gsettings", "set", schema, "picture-options", "zoom"], check=True)
 
 
+if sys.platform == "win32":
+    from .windows import screen_resolution, set_wallpaper  # noqa: F811
+
+
 def next_random() -> str:
     cfg = store.load(paths.CONFIG_FILE)
     url = cfg.get("album")
@@ -49,7 +54,7 @@ def next_random() -> str:
     w, h = cfg.get("resolucion") or screen_resolution()
     data = album.fetch(f"{chosen}=w{w}-h{h}")
     paths.ensure_dirs()
-    # Nombre distinto cada vez: GNOME no recarga la imagen si la ruta no cambia.
+    # Nombre distinto cada vez: GNOME (y a veces Windows) no recarga la imagen si la ruta no cambia.
     n = state.get("n", 0) + 1
     dest = paths.CACHE_DIR / f"fondo-{n % 2}.jpg"
     dest.write_bytes(data)
