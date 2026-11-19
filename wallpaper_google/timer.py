@@ -34,3 +34,7 @@ def uninstall() -> None:
         (UNIT_DIR / f"{NAME}.{ext}").unlink(missing_ok=True)
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
     print("Cambio automático desactivado.")
+
+
+if sys.platform == "win32":
+    from .windows import install, uninstall  # noqa: F811
